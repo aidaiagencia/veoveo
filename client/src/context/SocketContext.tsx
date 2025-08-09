@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import io, { Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
-const API_URL = 'http://10.0.2.2:3001';
+const API_URL = 'https://veoveo-server.onrender.com';
 
 interface SocketContextType {
   socket: Socket | null;
