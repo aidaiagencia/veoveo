@@ -3,7 +3,7 @@ import io, { Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
 // For Android emulator, 10.0.2.2 points to the host machine's localhost.
-const API_URL = 'http://10.0.2.2:3001';
+const API_URL = 'https://veoveo-server.onrender.com';
 
 interface SocketContextType {
   socket: Socket | null;
