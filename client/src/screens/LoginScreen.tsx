@@ -10,7 +10,7 @@ type RootStackParamList = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-const API_URL = 'http://10.0.2.2:3001';
+const API_URL = 'https://veoveo-server.onrender.com';
 
 const LoginScreen = ({ navigation }: Props) => {
   const { login } = useAuth();
