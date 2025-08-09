@@ -22,13 +22,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       });
       setSocket(newSocket);
 
-      newSocket.on('connect', () => {
-        console.log('Socket connected:', newSocket.id);
-      });
-
       // This cleanup function will run when the user logs out
       return () => {
-        console.log('Disconnecting socket...');
         newSocket.disconnect();
       };
     } else {

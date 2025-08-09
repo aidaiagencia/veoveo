@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -19,10 +19,12 @@ const HomeScreen = ({ navigation }: Props) => {
   const { userInfo, logout } = useAuth();
   const { socket } = useSocket();
   const [gameMode, setGameMode] = useState<GameMode>('random');
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
     const handleRoomCreated = (data: { roomCode: string; players: any[] }) => {
+      setIsCreatingRoom(false);
       navigation.navigate('Lobby', { roomCode: data.roomCode, players: data.players });
     };
     socket.on('room_created', handleRoomCreated);
@@ -34,6 +36,8 @@ const HomeScreen = ({ navigation }: Props) => {
   }
 
   const handleCreateRoom = () => {
+    if (isCreatingRoom) return;
+    setIsCreatingRoom(true);
     socket?.emit('create_room', {
       playerId: userInfo.playerId,
       username: userInfo.username,
@@ -43,7 +47,7 @@ const HomeScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.profileIcon} onPress={() => navigation.navigate('Profile', { userId: userInfo.userId, playerId: userInfo.playerId })}>
+      <TouchableOpacity style={styles.profileIcon} onPress={() => navigation.navigate('Profile', { userId: userInfo.userId, playerId: userInfo.playerId })} disabled={isCreatingRoom}>
         <Text style={styles.profileIconText}>👤</Text>
       </TouchableOpacity>
 
@@ -53,18 +57,22 @@ const HomeScreen = ({ navigation }: Props) => {
       <View style={styles.createRoomContainer}>
         <Text style={styles.gameModeLabel}>Game Mode:</Text>
         <View style={styles.gameModeSelector}>
-            <TouchableOpacity onPress={() => setGameMode('random')} style={[styles.modeButton, gameMode === 'random' && styles.selectedMode]}>
+            <TouchableOpacity onPress={() => setGameMode('random')} style={[styles.modeButton, gameMode === 'random' && styles.selectedMode]} disabled={isCreatingRoom}>
                 <Text style={styles.modeText}>Random Word</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setGameMode('host_choice')} style={[styles.modeButton, gameMode === 'host_choice' && styles.selectedMode]}>
+            <TouchableOpacity onPress={() => setGameMode('host_choice')} style={[styles.modeButton, gameMode === 'host_choice' && styles.selectedMode]} disabled={isCreatingRoom}>
                 <Text style={styles.modeText}>Host Chooses</Text>
             </TouchableOpacity>
         </View>
-        <Button title="Crear Sala" onPress={handleCreateRoom} />
+        {isCreatingRoom ? (
+          <ActivityIndicator size="large" color="#4A90E2" />
+        ) : (
+          <Button title="Crear Sala" onPress={handleCreateRoom} />
+        )}
       </View>
 
       <View style={styles.joinRoomContainer}>
-        <Button title="Unirse a una Sala" onPress={() => navigation.navigate('JoinRoom')} />
+        <Button title="Unirse a una Sala" onPress={() => navigation.navigate('JoinRoom')} disabled={isCreatingRoom} />
       </View>
 
       <View style={styles.logoutButton}>
@@ -80,7 +88,7 @@ const styles = StyleSheet.create({
   profileIconText: { fontSize: 30 },
   title: { fontSize: 48, fontWeight: 'bold', marginBottom: 10 },
   welcome: { fontSize: 18, marginBottom: 40 },
-  createRoomContainer: { width: '80%', padding: 20, borderWidth: 1, borderColor: '#ccc', borderRadius: 10, alignItems: 'center', marginBottom: 20 },
+  createRoomContainer: { width: '80%', padding: 20, borderWidth: 1, borderColor: '#ccc', borderRadius: 10, alignItems: 'center', marginBottom: 20, minHeight: 150, justifyContent: 'center' },
   gameModeLabel: { fontSize: 16, marginBottom: 10 },
   gameModeSelector: { flexDirection: 'row', marginBottom: 20 },
   modeButton: { padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5, marginHorizontal: 5 },
