@@ -9,7 +9,7 @@ type RootStackParamList = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
-const API_URL = 'https://veoveo-server.onrender.com';
+const API_URL = 'http://10.0.2.2:3001';
 
 const RegisterScreen = ({ navigation }: Props) => {
   const [username, setUsername] = useState('');

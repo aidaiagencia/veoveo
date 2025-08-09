@@ -2,8 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import io, { Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
-// For Android emulator, 10.0.2.2 points to the host machine's localhost.
-const API_URL = 'https://veoveo-server.onrender.com';
+const API_URL = 'http://10.0.2.2:3001';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -17,26 +16,34 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Connect to the server
-      const newSocket = io(API_URL);
+      const newSocket = io(API_URL, {
+        // ensures new connection instead of re-using an old one
+        forceNew: true,
+      });
       setSocket(newSocket);
 
       newSocket.on('connect', () => {
         console.log('Socket connected:', newSocket.id);
       });
 
-      // Disconnect on cleanup or when auth state changes
+      // This cleanup function will run when the user logs out
       return () => {
         console.log('Disconnecting socket...');
         newSocket.disconnect();
       };
+    } else {
+      // If the user is not authenticated, ensure the socket is null.
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+      }
     }
   }, [isAuthenticated]);
 
   return (
     <SocketContext.Provider value={{ socket }}>
       {children}
-    </SocketContext.Provider>
+    </Socket.Provider>
   );
 };
 
